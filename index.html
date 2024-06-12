@@ -1,108 +1,106 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Motivational Website</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            color: #333;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class sd01 implements ActionListener {
+    private JFrame frame;
+    private JButton[] buttons;
+    private boolean xTurn;
+
+    public sd01() {
+        frame = new JFrame("Tic Tac Toe");
+        buttons = new JButton[9];
+        xTurn = true;
+
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(400, 400);
+        frame.setLayout(new GridLayout(3, 3));
+
+        for (int i = 0; i < 9; i++) {
+            buttons[i] = new JButton("");
+            buttons[i].setFont(new Font("Arial", Font.PLAIN, 60));
+            buttons[i].setFocusPainted(false);
+            buttons[i].addActionListener(this);
+            frame.add(buttons[i]);
         }
 
-        header {
-            background-color: #ff7043;
-            color: white;
-            padding: 20px;
-            text-align: center;
+        frame.setVisible(true);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        JButton buttonClicked = (JButton) e.getSource();
+        if (!buttonClicked.getText().equals("")) {
+            return;
         }
 
-        h1 {
-            margin: 0;
-            font-size: 36px;
-            letter-spacing: 2px;
+        if (xTurn) {
+            buttonClicked.setText("X");
+        } else {
+            buttonClicked.setText("O");
         }
 
-        main {
-            padding: 20px;
+        xTurn = !xTurn;
+        checkForWinner();
+    }
+
+    private void checkForWinner() {
+        String[][] board = new String[3][3];
+        for (int i = 0; i < 9; i++) {
+            board[i / 3][i % 3] = buttons[i].getText();
         }
 
-        .quote {
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: transform 0.2s;
+        // Check rows, columns, and diagonals
+        for (int i = 0; i < 3; i++) {
+            if (board[i][0].equals(board[i][1]) && board[i][1].equals(board[i][2]) && !board[i][0].equals("")) {
+                showWinner(board[i][0]);
+                return;
+            }
+            if (board[0][i].equals(board[1][i]) && board[1][i].equals(board[2][i]) && !board[0][i].equals("")) {
+                showWinner(board[0][i]);
+                return;
+            }
         }
 
-        .quote:hover {
-            transform: scale(1.02);
+        if (board[0][0].equals(board[1][1]) && board[1][1].equals(board[2][2]) && !board[0][0].equals("")) {
+            showWinner(board[0][0]);
+            return;
         }
 
-        .quote p {
-            font-size: 18px;
-            line-height: 1.6;
-            margin: 0;
+        if (board[0][2].equals(board[1][1]) && board[1][1].equals(board[2][0]) && !board[0][2].equals("")) {
+            showWinner(board[0][2]);
+            return;
         }
 
-        .author {
-            font-weight: bold;
-            margin-top: 10px;
-            text-align: right;
-            color: #ff7043;
+        // Check for draw
+        boolean draw = true;
+        for (int i = 0; i < 9; i++) {
+            if (buttons[i].getText().equals("")) {
+                draw = false;
+                break;
+            }
         }
 
-        footer {
-            background-color: #333;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            font-size: 14px;
+        if (draw) {
+            JOptionPane.showMessageDialog(frame, "The game is a draw!");
+            resetBoard();
         }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>Power of Motivation</h1>
-    </header>
+    }
 
-    <main>
-        <div class="quote">
-            <p>"प्रगति के लिए प्रयास करें, पूर्णता के लिए नहीं। शिक्षा का उद्देश्य प्रगतिशील मनुष्यों का निर्माण करना है, न कि केवल वे जो पूर्णता के पीछे अस्पष्ट रूप से भागते हैं। यदि आप इसके बारे में सोचते हैं, तो मानव समाज को एक सभ्य समाज में बदलने वाला एकमात्र आवश्यक कारक शिक्षा है। ऐसी हिंदी मोटिवेशनल कोट्स (Motivational quotes in Hindi) आपको अपने लक्ष्य को प्राप्त करने के लिए मजबूत करते हैं, आपके अंदर की एनर्जी का निर्माण करते हैं। इस दुनिया में कोई चीज और मुकाम ऐसा नहीं जिसे हम हासिल नहीं कर सके। अगर हमें किसी मुकाम को पाने का लक्ष्य निश्चय को साथ किया है तो कितनी ही अध्याय उस मंज़िल को पाने के लिए सामने क्यों ना आए हम उन बाधाओं से लड़ते हुए अपनी मंजिल को बढ़ते रहेंगे हम उसको हासिल कर सकते हैं।"</p>
-            <p class="author">- Theodore Roosevelt</p>
-        </div>
+    private void showWinner(String winner) {
+        JOptionPane.showMessageDialog(frame, "Player " + winner + " wins!");
+        resetBoard();
+    }
 
-        <div class="quote">
-            <p>"Success is not final, failure is not fatal: It is the courage to continue that counts."</p>
-            <p class="author">- Winston Churchill</p>
-        </div>
+    private void resetBoard() {
+        for (int i = 0; i < 9; i++) {
+            buttons[i].setText("");
+        }
+        xTurn = true;
+    }
 
-        <div class="quote">
-            <p>"The only way to do great work is to love what you do."</p>
-            <p class="author">- Steve Jobs</p>
-        </div>
-
-        <div class="quote">
-            <p>"The best time to plant a tree was 20 years ago. The second best time is now."</p>
-            <p class="author">- Chinese Proverb</p>
-        </div>
-
-        <div class="quote">
-            <p>"Your time is limited, don't waste it living someone else's life."</p>
-            <p class="author">- Steve Jobs</p>
-        </div>
-
-        <div class="quote">
-            <p>"The harder you work for something, the greater you'll feel when you achieve it."</p>
-            <p class="author">- Anonymous</p>
-        </div>
-    </main>
-
-    <footer>
-        &copy; 2023 Motivational Website. All rights reserved.<br>
-        &copy; Sachin Dubey, the owner of Power of Motivation.
-    </footer>
-</body>
-</html>
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(sd01::new);
+    }
+}
