@@ -14,9 +14,12 @@
             align-items: center;
             height: 100vh;
             background-color: #f0f0f0;
+            overflow: hidden;
         }
         #container {
             text-align: center;
+            z-index: 1;
+            position: relative;
         }
         .cell {
             width: 100px;
@@ -24,18 +27,87 @@
             border: 2px solid #ccc;
             font-size: 3em;
             cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .cell:hover {
+            background-color: #e0e0e0;
+            transform: scale(1.1);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
         }
         .row {
             display: flex;
         }
-        .message {
+        .message, .score {
             margin-top: 20px;
             font-size: 1.5em;
             font-weight: bold;
         }
+        #winnerPopup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-size: 5em;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 10;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background-color: #ddd;
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+        .snake {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+        .snake div {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: rgba(0, 0, 0, 0.1);
+            animation: snake-animation 20s linear infinite;
+        }
+        @keyframes snake-animation {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(100vw, 100vh); }
+        }
     </style>
 </head>
 <body>
+    <div class="snake">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
     <div id="container">
         <h1>Tic Tac Toe</h1>
         <div id="board">
@@ -56,12 +128,20 @@
             </div>
         </div>
         <div id="message" class="message"></div>
+        <div id="score" class="score">
+            Player X Wins: <span id="xWins">0</span> | Player O Wins: <span id="oWins">0</span> | Draws: <span id="draws">0</span>
+        </div>
         <button onclick="resetBoard()">Reset</button>
     </div>
+    <div id="winnerPopup" onclick="hidePopup()"></div>
     <script>
         let board = ['', '', '', '', '', '', '', '', ''];
         let xTurn = true;
         let gameOver = false;
+        let xWins = 0;
+        let oWins = 0;
+        let draws = 0;
+        let startWithX = true; // Track starting player
 
         function handleClick(index) {
             if (gameOver || board[index] !== '') return;
@@ -77,6 +157,7 @@
             const cells = document.querySelectorAll('.cell');
             cells.forEach((cell, index) => {
                 cell.innerText = board[index];
+                cell.style.color = board[index] === 'X' ? '#f00' : '#00f';
             });
         }
 
@@ -90,7 +171,10 @@
             for (let combo of winningCombos) {
                 const [a, b, c] = combo;
                 if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-                    displayMessage(`Player ${board[a]} wins!`);
+                    const winner = board[a];
+                    displayMessage(`Player ${winner} wins!`);
+                    showPopup(winner);
+                    updateScore(winner);
                     gameOver = true;
                     return;
                 }
@@ -98,6 +182,8 @@
 
             if (!board.includes('')) {
                 displayMessage("It's a draw!");
+                draws++;
+                document.getElementById('draws').innerText = draws;
                 gameOver = true;
             }
         }
@@ -108,11 +194,42 @@
 
         function resetBoard() {
             board = ['', '', '', '', '', '', '', '', ''];
-            xTurn = true;
+            xTurn = startWithX; // Alternate starting player
+            startWithX = !startWithX; // Toggle for next game
             gameOver = false;
             drawBoard();
             displayMessage('');
+            hidePopup();
         }
+
+        function showPopup(winner) {
+            const popup = document.getElementById('winnerPopup');
+            popup.innerText = `Player ${winner} Wins!`;
+            popup.style.display = 'flex';
+        }
+
+        function hidePopup() {
+            const popup = document.getElementById('winnerPopup');
+            popup.style.display = 'none';
+        }
+
+        function updateScore(winner) {
+            if (winner === 'X') {
+                xWins++;
+                document.getElementById('xWins').innerText = xWins;
+            } else {
+                oWins++;
+                document.getElementById('oWins').innerText = oWins;
+            }
+        }
+
+        // Generate random snake movements
+        const snakeElements = document.querySelectorAll('.snake div');
+        snakeElements.forEach((el, index) => {
+            el.style.left = `${Math.random() * 100}vw`;
+            el.style.top = `${Math.random() * 100}vh`;
+            el.style.animationDelay = `${index * 2}s`;
+        });
     </script>
 </body>
 </html>
